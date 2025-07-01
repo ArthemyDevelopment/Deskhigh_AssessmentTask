@@ -3,6 +3,10 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+
+/// <summary>
+/// Create standardize animations for UI Elements using Canvas Renderer
+/// </summary>
 public class UIAnimationEvents : MonoBehaviour
 {
     private CanvasRenderer _image; 

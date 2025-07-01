@@ -3,6 +3,12 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+
+/// <summary>
+/// Skills window controller implementing IUIMenu interface.
+/// Manage all the values for the open and close menu and change tab animations.
+/// Contains references to all skills buttons and skills panels
+/// </summary>
 public class SkillsController : MonoBehaviour, IUIMenu
 {
     private RectTransform _transform;
@@ -14,7 +20,12 @@ public class SkillsController : MonoBehaviour, IUIMenu
 
     [Header("General Lerp Values")] 
     [SerializeField] private float animationTime= 0.3f;
+    
+    /// <summary>
+    /// Allows to ignore standardize movement of buttons if a specific tab was selected
+    /// </summary>
     [SerializeField] private SkillTabSelection IgnoreForceRotationWhenSelected;
+    
     [Header("Button Lerp Values")] 
     [SerializeField] private Vector2 OpenButtonSize;
     [SerializeField] private Vector2 OpenButtonPosition;
@@ -40,7 +51,7 @@ public class SkillsController : MonoBehaviour, IUIMenu
     [SerializeField]private SkillTabSelection[] SkillsTabsButtons;
     private SkillTabSelection[] OpenWindowSkillTabOrder;
     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+   
     void Awake()
     {
         OpenWindowSkillTabOrder = new SkillTabSelection[SkillsTabsButtons.Length];
@@ -61,6 +72,10 @@ public class SkillsController : MonoBehaviour, IUIMenu
         }
     }
 
+    
+    /// <summary>
+    /// Calculate the position for all the buttons when the menu is closed based on a pentagon shape
+    /// </summary>
     void GetCloseButtonTabPositions()
     {
         float startAngleDeg = 90f;
@@ -78,6 +93,9 @@ public class SkillsController : MonoBehaviour, IUIMenu
         }
     }
 
+    /// <summary>
+    /// Calculate the position for al the buttons when the menu is open considering an equal distribution en the left side 
+    /// </summary>
     void GetOpenButtonTabPositions()
     {
         float[] anglesDeg = { 90, -225, 180, 225, -90 };
@@ -93,6 +111,12 @@ public class SkillsController : MonoBehaviour, IUIMenu
     
 
 
+    /// <summary>
+    /// Manage the movements of the buttons when a new tab is selected.
+    /// Creates a referential array of the current position, gets the index of the tab to be selected and shift the position
+    /// of every tab based on their previous position, triggering a Lerp animation.
+    /// </summary>
+    /// <param name="tab"> the button being selected</param>
     public void ChangeTab(SkillTabSelection tab)
     {
         int temp = Array.IndexOf(OpenWindowSkillTabOrder,tab);
@@ -124,6 +148,11 @@ public class SkillsController : MonoBehaviour, IUIMenu
 
     }
 
+    
+    /// <summary>
+    /// Manage the behaviour when the menu opens
+    /// Animate the size and position of the holder with lerps, and moves all the buttons based on the previous selected tab.
+    /// </summary>
     public void OpenMenu()
     {
         _button.enabled = false;
@@ -143,6 +172,10 @@ public class SkillsController : MonoBehaviour, IUIMenu
         OpenWindowSkillTabOrder[SelectTabIndex].SelectTab();
     }
 
+    /// <summary>
+    /// Manage the behaviour when the menu closes
+    /// Animate the size and position of the holder with lerps, and moves all the buttons based on final position of the selected tab.
+    /// </summary>
     public void CloseMenu()
     {
         _button.enabled = true;
@@ -164,6 +197,13 @@ public class SkillsController : MonoBehaviour, IUIMenu
         }
     }
     
+    /// <summary>
+    /// Simple lerp to animate the holder size
+    /// </summary>
+    /// <param name="curSize">Current size of the holder</param>
+    /// <param name="newSize">Target size of the holder</param>
+    /// <param name="duration">Duration of the lerp animation</param>
+    /// <returns></returns>
     IEnumerator LerpSize(Vector2 curSize,Vector2 newSize, float duration)
     {
         float t = 0;
@@ -180,6 +220,13 @@ public class SkillsController : MonoBehaviour, IUIMenu
 
     }
 
+    /// <summary>
+    /// Simple lerp to animate the holder position
+    /// </summary>
+    /// <param name="curPosition">Current position of the holder</param>
+    /// <param name="newPosition">Target position of the holder</param>
+    /// <param name="duration">Duration of the lerp animation</param>
+    /// <returns></returns>
     IEnumerator LerpPosition(Vector2 curPosition, Vector2 newPosition, float duration)
     {
         float t = 0;
