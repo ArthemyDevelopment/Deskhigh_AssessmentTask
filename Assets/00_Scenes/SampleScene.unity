@@ -1241,6 +1241,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1143610594}
     - target: {fileID: 4587381466259862946, guid: 6869466c3d0c5524f9ba465d19f5b91c, type: 3}
+      propertyPath: OpenButtonTabSizes.Array.data[2].x
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 4587381466259862946, guid: 6869466c3d0c5524f9ba465d19f5b91c, type: 3}
+      propertyPath: OpenButtonTabSizes.Array.data[2].y
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 4587381466259862946, guid: 6869466c3d0c5524f9ba465d19f5b91c, type: 3}
       propertyPath: ClosedButtonTabPositions.Array.size
       value: 5
       objectReference: {fileID: 0}
