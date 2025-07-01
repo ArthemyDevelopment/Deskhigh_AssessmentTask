@@ -9,69 +9,58 @@ public class SkillTabSelection : MonoBehaviour
     private RectTransform _transform;
     private Image _iconImage;
     private Button _button;
-    [SerializeField] private Vector2 CenterOfRotation;
-    [SerializeField] private Vector2 CloseButtonPosition;
-    [SerializeField] private Vector2 CloseButtonSize= new Vector2(95,95);
+
+    [Header("Skill Panel")] 
+    [SerializeField] private GameObject SkillPanel;
+    
+    [Header("Icon values")]
     [SerializeField] private Sprite IdleSprite;
     [SerializeField] private Sprite SelectedSprite;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
+    
 
-
-    private void Awake()
+    public void SetUp(SkillsController controller, Vector2 startingPosition, Vector2 startingSize)
     {
         if (_iconImage == null) _iconImage = GetComponent<Image>();
         if (_transform == null) _transform = GetComponent<RectTransform>();
         if (_button == null) _button = GetComponent<Button>();
-        _transform.localPosition = CloseButtonPosition;
-        _transform.sizeDelta = CloseButtonSize;
         _button.enabled = false;
-        DeselectTab();
-    }
-
-    public void SetUp(SkillsController controller)
-    {
         _controller = controller;
+        _transform.localPosition = startingPosition;
+        _transform.sizeDelta = startingSize;
+         DeselectTab();
     }
 
-    private void OnEnable()
-    {
-        _iconImage.sprite = IdleSprite;
-    }
+
 
     public void ChangeTab()
     {
-        SelectTab();
         _controller.ChangeTab(this);
+        SelectTab();
     }
 
     public void SelectTab()
     {
         _iconImage.sprite = SelectedSprite;
+        SkillPanel.SetActive(true);
     }
     
     public void DeselectTab()
     {
         _iconImage.sprite = IdleSprite;
+        SkillPanel.SetActive(false);
     }
 
-    public void MoveButton(Vector2 OpenButtonPosition, Vector2 OpenButtonSize, float animationTime)
+    public void ActiveButton(bool state)
     {
-        BeginLerpPosition(OpenButtonPosition, animationTime);
-        BeginLerpSize(OpenButtonSize, animationTime);
-        if (!_button.enabled) _button.enabled = true;
+        if(_button.enabled!=state)_button.enabled = state;
     }
 
-    public void RotateButton(Vector2 OpenButtonPosition, Vector2 OpenButtonSize, float animationTime, bool clockwise = true)
+    public void MoveButton(Vector2 newButtonPosition, Vector2 NewButtonSize,Vector2 CenterOfRotation, float animationTime, float? targetRadius=null, bool? clockwise=null)
     {
-        BeginLerpCircularPosition(OpenButtonPosition, animationTime, clockwise);
-        BeginLerpSize(OpenButtonSize, animationTime);
-    }
-
-    public void OnCloseButton(float animationTime)
-    {
-        BeginLerpSize(CloseButtonSize, animationTime);
-        BeginLerpPosition(CloseButtonPosition, animationTime);
-        _button.enabled = false;
+        BeginLerpPosition(newButtonPosition, CenterOfRotation,animationTime,targetRadius, clockwise);
+        BeginLerpSize(NewButtonSize, animationTime);
     }
 
 
@@ -80,20 +69,15 @@ public class SkillTabSelection : MonoBehaviour
         StartCoroutine(LerpSize(_transform.sizeDelta, newSize, duration));
     }
 
-    public void BeginLerpPosition(Vector2 newPosition, float duration)
+    public void BeginLerpPosition(Vector2 newPosition, Vector2 CenterOfRotation,float duration, float? targetRadius=null,bool? clockwise=null)
     {
-        StartCoroutine(LerpPosition(_transform.localPosition, newPosition, duration));
+        StartCoroutine(LerpCircularPosition(_transform.localPosition, newPosition, CenterOfRotation,duration, targetRadius,clockwise));
     }
     
-    public void BeginLerpCircularPosition(Vector2 newPosition, float duration, bool clockwise=true)
-    {
-        StartCoroutine(LerpCircularPosition(_transform.localPosition, newPosition, duration, clockwise));
-    }
 
     IEnumerator LerpSize(Vector2 curSize,Vector2 newSize, float duration)
     {
         float t = 0;
-        
         
         while (t < duration)
         {
@@ -106,21 +90,8 @@ public class SkillTabSelection : MonoBehaviour
 
     }
 
-    IEnumerator LerpPosition(Vector2 curPosition, Vector2 newPosition, float duration)
-    {
-        float t = 0;
-
-        while (t < duration)
-        {
-            _transform.localPosition = Vector2.Lerp(curPosition, newPosition, t / duration);
-            t += Time.deltaTime;
-            yield return null;
-        }
-
-        _transform.localPosition = newPosition;
-    }
     
-    IEnumerator LerpCircularPosition(Vector2 curPosition, Vector2 newPosition, float duration, bool clockwise = true)
+    IEnumerator LerpCircularPosition(Vector2 curPosition, Vector2 newPosition, Vector2 CenterOfRotation,float duration, float? targetRadiusOverride = null, bool? clockwise = null)
     {
         float t = 0f;
 
@@ -131,20 +102,30 @@ public class SkillTabSelection : MonoBehaviour
         float endAngle = Mathf.Atan2(to.y, to.x);
 
         float angleDifference = Mathf.DeltaAngle(startAngle * Mathf.Rad2Deg, endAngle * Mathf.Rad2Deg) * Mathf.Deg2Rad;
-        
-        if (clockwise && angleDifference > 0)
-            angleDifference -= 2 * Mathf.PI;
-        else if (!clockwise && angleDifference < 0)
-            angleDifference += 2 * Mathf.PI;
 
-        float radius = from.magnitude;
+        if (clockwise.HasValue)
+        {
+            if (clockwise.Value && angleDifference > 0)
+                angleDifference -= 2 * Mathf.PI;
+            else if (!clockwise.Value && angleDifference < 0)
+                angleDifference += 2 * Mathf.PI;
+        }
+
+        float startRadius = from.magnitude;
+        float endRadius = targetRadiusOverride ?? to.magnitude;
 
         while (t < duration)
         {
             float interp = t / duration;
             float currentAngle = startAngle + angleDifference * interp;
+            
+            float currentRadius = Mathf.Lerp(startRadius, endRadius, interp);
 
-            Vector2 offset = new Vector2(Mathf.Cos(currentAngle), Mathf.Sin(currentAngle)) * radius;
+            Vector2 offset = new Vector2(
+                Mathf.Cos(currentAngle),
+                Mathf.Sin(currentAngle)
+            ) * currentRadius;
+
             _transform.localPosition = CenterOfRotation + offset;
 
             t += Time.deltaTime;
