@@ -2,7 +2,7 @@ using UnityEngine;
 
 public interface IUIMenu
 {
-    public void OpenMenu() { }
+    public abstract void OpenMenu();
 
-    public void CloseMenu() { }
+    public abstract void CloseMenu();
 }
