@@ -1,8 +1,12 @@
 using UnityEngine;
 
+
+/// <summary>
+/// Interface to standardize all UI Menus
+/// </summary>
 public interface IUIMenu
 {
-    public void OpenMenu() { }
+    public abstract void OpenMenu();
 
-    public void CloseMenu() { }
+    public abstract void CloseMenu();
 }
